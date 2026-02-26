@@ -1,5 +1,7 @@
 const express = require('express');
 const path = require('path');
+const taskStore = require('./data/taskStore');
+
 const PORT = 3000
 const DATA_FILE = 'tasks.json'
 
@@ -23,15 +25,15 @@ function genResponseHTML(formData) {
             <h2>Task Info</h2>
             <div class="profile-row">
                 <span class="field-label">Task:</span>
-                <span class="field-value">${formDataString.title}</span>
+                <span class="field-value">${formData.title}</span>
             </div>
             <div class="profile-row">
                 <span class="field-label">Description:</span>
-                <span class="field-value">${formDataString.description}</span>
+                <span class="field-value">${formData.description}</span>
             </div>
             <div class="profile-row">
                 <span class="field-label">Due Date:</span>
-                <span class="field-value">${new Date(formDataString.dueDate).toLocaleDateString()}</span>
+                <span class="field-value">${new Date(formData.dueDate).toLocaleDateString()}</span>
             </div>
         </div>
         
@@ -43,6 +45,12 @@ function genResponseHTML(formData) {
 
 // app now instance of express
 const app = express();
+
+// logger - runs on every request
+app.use((req,res,next) => {
+    console.log(`Got a request: ${req.method} ${req.path}`);
+    next();
+});
 
 // Replaces parseFormData() AND the req.on('data') / req.on('end') pattern
 app.use(express.urlencoded({ extended: false }));
@@ -61,8 +69,11 @@ res.sendFile(path.join(__dirname, 'public', 'index.html'));
 // // req.body is already parsed — no manual chunk collecting needed
 app.post('/task/process', (req, res) => {
 console.log(req.body); // already a plain JS object
-const html = genResponseHTML(req.body);
-res.send(html); // res.send() sets Content-Type automatically
+
+taskStore.save(JSON.stringify(req.body));
+
+const responseHTML = genResponseHTML(req.body);
+res.send(responseHTML); // res.send() sets Content-Type automatically
 });
 
 // 404 catch-all — must be LAST
