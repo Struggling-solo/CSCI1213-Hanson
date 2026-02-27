@@ -16,6 +16,7 @@ function genResponseHTML(formData) {
     <!-- This CSS file will also be requested from the server! -->
     <link rel="stylesheet" href="/css/styles.css">
 </head>
+
 <body>
     <div class="profile-container">
         <div class="success-badge">✓ Successfully Submitted</div>
@@ -37,10 +38,66 @@ function genResponseHTML(formData) {
             </div>
         </div>
         
-       
+         <div class="button-group">
+            <a href="/createTask.html">
+                <button type="button">Add Another Task</button>
+            </a>
+
+            <a href="/">
+                <button type="button">Home</button>
+            </a>
+        </div>      
 </body>
 </html>
     `;
+}
+
+function genAllTasksHTML(tasks) {
+
+  let taskRows = "";
+
+  if (tasks.length === 0) {
+    taskRows = "<p>No tasks available.</p>";
+  } else {
+    tasks.forEach(task => {
+      taskRows += `
+        <div class="task-card">
+            <p><strong>ID:</strong> ${task.id}</p>
+            <p><strong>Title:</strong> ${task.title}</p>
+            <p><strong>Description:</strong> ${task.description}</p>
+            <p><strong>Due Date:</strong> 
+              ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}
+            </p>
+        </div>
+        <hr>
+      `;
+    });
+  }
+
+  return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>All Tasks</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <h1>All Tasks</h1>
+    
+    ${taskRows}
+
+    <br>
+    <a href="/">
+        <button type="button">Home</button>
+    </a>
+
+    <a href="/createTask.html">
+        <button type="button">Add Task</button>
+    </a>
+
+</body>
+</html>
+`;
 }
 
 // app now instance of express
@@ -70,10 +127,18 @@ res.sendFile(path.join(__dirname, 'public', 'index.html'));
 app.post('/task/process', (req, res) => {
 console.log(req.body); // already a plain JS object
 
-taskStore.save(JSON.stringify(req.body));
+taskStore.saveTask(req.body);
 
 const responseHTML = genResponseHTML(req.body);
 res.send(responseHTML); // res.send() sets Content-Type automatically
+});
+
+// GET /tasks — view all tasks
+app.get('/tasks', (req, res) => {
+    const tasks = taskStore.load();
+
+    const html = genAllTasksHTML(tasks);
+    res.send(html);
 });
 
 // 404 catch-all — must be LAST
