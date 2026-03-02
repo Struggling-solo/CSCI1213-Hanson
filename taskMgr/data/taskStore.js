@@ -26,17 +26,23 @@ function saveTask(task) {
 
     // Determine next ID
     let nextId = 1;
+
     if (allTasks.length > 0) {
-      const lastTask = allTasks[allTasks.length - 1];
-      nextId = lastTask.id ? lastTask.id + 1 : allTasks.length + 1;
+      const allIds = allTasks.map(t => t.id);
+      const maxId = Math.max(...allIds);
+      nextId = maxId + 1;
     }
 
-    // Assign ID to task
+    // Assign ID
     task.id = nextId;
 
     allTasks.push(task);
 
-    fs.writeFileSync(DATA_FILE, JSON.stringify(allTasks, null, 2), "utf-8");
+    fs.writeFileSync(
+      DATA_FILE,
+      JSON.stringify(allTasks, null, 2),
+      "utf-8"
+    );
 
   } catch (err) {
     console.log(`Error on Save Task data ${err.message}`);
