@@ -1,56 +1,10 @@
 const express = require('express');
 const path = require('path');
 const taskStore = require('./data/taskStore');
-
+const fs = require('fs')
 const PORT = 3000
 const DATA_FILE = 'tasks.json'
 
-function genResponseHTML(formData) {
-  return `
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Created</title>
-    <!-- This CSS file will also be requested from the server! -->
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-
-<body>
-    <div class="profile-container">
-        <div class="success-badge">✓ Successfully Submitted</div>
-        <h1>Task Created</h1>
-        
-        <div class="profile-section">
-            <h2>Task Info</h2>
-            <div class="profile-row">
-                <span class="field-label">Task:</span>
-                <span class="field-value">${formData.title}</span>
-            </div>
-            <div class="profile-row">
-                <span class="field-label">Description:</span>
-                <span class="field-value">${formData.description}</span>
-            </div>
-            <div class="profile-row">
-                <span class="field-label">Due Date:</span>
-                <span class="field-value">${new Date(formData.dueDate).toLocaleDateString()}</span>
-            </div>
-        </div>
-        
-         <div class="button-group">
-            <a href="/createTask.html">
-                <button type="button">Add Another Task</button>
-            </a>
-
-            <a href="/">
-                <button type="button">Home</button>
-            </a>
-        </div>      
-</body>
-</html>
-    `;
-}
 
 function genAllTasksHTML(tasks) {
 
@@ -115,6 +69,8 @@ app.use(express.urlencoded({ extended: false }));
 // Replaces serveStaticFile(), mimeTypes, fs.readFile(), and security check
 app.use(express.static(path.join(__dirname, 'public')));
 // dirname is where server is running from
+app.set('view engine', 'ejs')
+app.set('views', './views')
 
 // GET / — index page
 app.get('/', (req, res) => {
@@ -140,6 +96,11 @@ app.get('/tasks', (req, res) => {
     const html = genAllTasksHTML(tasks);
     res.send(html);
 });
+
+app.get('/tasks/all/', (req,res) =>{
+    const tasks = JSON.parse(fs.readFileSync('./tasks.json'))
+    res.render('sampleEJS',{tasks})
+})
 
 // 404 catch-all — must be LAST
 app.use((req, res) => {

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EJS Demo</title>
+</head>
+<body>
+        <h2> EJS Sandbox</h2>
+        <p>
+            <ul>
+                <% tasks.forEach(task => { %>
+                    <li>
+                        <div class = "task">
+                            <b>Title:</b> <%= task.title %>
+                            <b>Description:</b> <%= task.description %>
+                            <b>Due Date:</b> <%= task.dueDate %>
+                        
+                        </div>
+
+                    </li>
+                        <%= }) %>
+            </ul>
+        </p>
+</body>
+</html>

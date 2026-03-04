@@ -1,19 +1,8 @@
 [
   {
-    "title": "try to get this thing to work",
-    "description": "get the tasks to save",
-    "dueDate": "2026-02-26"
-  },
-  {
-    "title": "Pack for Helena",
-    "description": "school assessments",
-    "dueDate": "2026-02-28",
-    "id": 2
-  },
-  {
-    "title": "Get quit claim deed signed by Dylan",
-    "description": "Get him out of home ownership",
-    "dueDate": "2026-03-01",
-    "id": 3
+    "title": "Pretty up the presentation",
+    "description": "go into css",
+    "dueDate": "2026-03-04",
+    "id": 1
   }
 ]

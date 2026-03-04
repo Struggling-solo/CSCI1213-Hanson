@@ -12,6 +12,7 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "ejs": "^4.0.1",
     "express": "^5.2.1",
     "readline-sync": "^1.4.10"
   }
