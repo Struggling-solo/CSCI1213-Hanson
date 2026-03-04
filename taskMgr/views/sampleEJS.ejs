@@ -6,21 +6,19 @@
     <title>EJS Demo</title>
 </head>
 <body>
-        <h2> EJS Sandbox</h2>
-        <p>
-            <ul>
-                <% tasks.forEach(task => { %>
-                    <li>
-                        <div class = "task">
-                            <b>Title:</b> <%= task.title %>
-                            <b>Description:</b> <%= task.description %>
-                            <b>Due Date:</b> <%= task.dueDate %>
-                        
-                        </div>
+        <h2>EJS Sandbox</h2>
 
-                    </li>
-                        <%= }) %>
-            </ul>
-        </p>
+        <ul>
+            <% tasks.forEach(task => { %>
+                <li>
+                    <div class="task">
+                        <b>Title:</b> <%= task.title %><br>
+                        <b>Description:</b> <%= task.description %><br>
+                        <b>Due Date:</b> <%= task.dueDate %>
+                    </div>
+                </li>
+            <% }) %>
+        </ul>
+
 </body>
 </html>
