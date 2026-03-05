@@ -1,0 +1,19 @@
+<h2>Delete a Task</h2>
+
+<% if (!tasks || tasks.length === 0) { %>
+  <p>No tasks to delete.</p>
+<% } else { %>
+  <ul class="task-list">
+    <% tasks.forEach(task => { %>
+      <li class="task">
+        <div><b>Title:</b> <%= task.title %></div>
+        <div><b>Description:</b> <%= task.description %></div>
+        <div><b>Due Date:</b> <%= task.dueDate %></div>
+
+        <form method="POST" action="/tasks/<%= task.id %>/delete" style="margin-top:8px;">
+          <button type="submit">Delete</button>
+        </form>
+      </li>
+    <% }) %>
+  </ul>
+<% } %>

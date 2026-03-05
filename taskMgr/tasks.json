@@ -4,5 +4,17 @@
     "description": "go into css",
     "dueDate": "2026-03-04",
     "id": 1
+  },
+  {
+    "title": "beat my head against a wall",
+    "description": "Use brick",
+    "dueDate": "2026-03-05",
+    "id": 2
+  },
+  {
+    "title": "Submit to repo",
+    "description": "Add, submit, push",
+    "dueDate": "2026-03-05",
+    "id": 3
   }
 ]

@@ -1,110 +1,101 @@
 const express = require('express');
 const path = require('path');
 const taskStore = require('./data/taskStore');
-const fs = require('fs')
-const PORT = 3000
-const DATA_FILE = 'tasks.json'
+const expressLayouts = require('express-ejs-layouts');
+const PORT = 3000;
+const DATA_FILE = 'tasks.json';
 
-
-function genAllTasksHTML(tasks) {
-
-  let taskRows = "";
-
-  if (tasks.length === 0) {
-    taskRows = "<p>No tasks available.</p>";
-  } else {
-    tasks.forEach(task => {
-      taskRows += `
-        <div class="task-card">
-            <p><strong>ID:</strong> ${task.id}</p>
-            <p><strong>Title:</strong> ${task.title}</p>
-            <p><strong>Description:</strong> ${task.description}</p>
-            <p><strong>Due Date:</strong> 
-              ${task.dueDate ? new Date(task.dueDate).toLocaleDateString() : "N/A"}
-            </p>
-        </div>
-        <hr>
-      `;
-    });
-  }
-
-  return `
-<!DOCTYPE html>
-<html>
-<head>
-    <title>All Tasks</title>
-    <link rel="stylesheet" href="/css/styles.css">
-</head>
-<body>
-    <h1>All Tasks</h1>
-    
-    ${taskRows}
-
-    <br>
-    <a href="/">
-        <button type="button">Home</button>
-    </a>
-
-    <a href="/createTask.html">
-        <button type="button">Add Task</button>
-    </a>
-
-</body>
-</html>
-`;
-}
-
-// app now instance of express
 const app = express();
 
-// logger - runs on every request
-app.use((req,res,next) => {
-    console.log(`Got a request: ${req.method} ${req.path}`);
-    next();
+console.log("RUNNING THIS FILE FROM:", __filename);
+console.log("WORKING DIRECTORY:", process.cwd());
+// logger
+app.use((req, res, next) => {
+  console.log(`Got a request: ${req.method} ${req.path}`);
+  next();
 });
 
-// Replaces parseFormData() AND the req.on('data') / req.on('end') pattern
+// form parsing
 app.use(express.urlencoded({ extended: false }));
 
-// Replaces serveStaticFile(), mimeTypes, fs.readFile(), and security check
+// static files (public/styles.css etc.)
 app.use(express.static(path.join(__dirname, 'public')));
-// dirname is where server is running from
-app.set('view engine', 'ejs')
-app.set('views', './views')
 
-// GET / — index page
+// ejs
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+app.use(expressLayouts);
+app.set('layout', 'layout');
+
+// HOME — show all tasks
 app.get('/', (req, res) => {
-res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-// GET /createTask.html
-
-// // POST /task/process — form submission
-// // req.body is already parsed — no manual chunk collecting needed
-app.post('/task/process', (req, res) => {
-console.log(req.body); // already a plain JS object
-
-taskStore.saveTask(req.body);
-
-const responseHTML = genResponseHTML(req.body);
-res.send(responseHTML); // res.send() sets Content-Type automatically
+  res.render('index', { title: 'Home'});
 });
 
-// GET /tasks — view all tasks
 app.get('/tasks', (req, res) => {
-    const tasks = taskStore.load();
-
-    const html = genAllTasksHTML(tasks);
-    res.send(html);
+  const tasks = taskStore.load();
+  res.render('sampleEJS', { title: 'All Tasks', tasks });
 });
 
-app.get('/tasks/all/', (req,res) =>{
-    const tasks = JSON.parse(fs.readFileSync('./tasks.json'))
-    res.render('sampleEJS',{tasks})
-})
+// SHOW CREATE FORM
+app.get('/create', (req, res) => {
+  res.render('createTask', {title: "Create a Task"});
+});
 
-// 404 catch-all — must be LAST
+function saveTask(task) {
+  let tasks = [];
+
+  if (fs.existsSync(DATA_FILE)) {
+    const data = fs.readFileSync(DATA_FILE, "utf-8");
+    tasks = JSON.parse(data);
+  }
+
+  // Determine next ID
+  let nextId = 1;
+
+  if (tasks.length > 0) {
+    const maxId = Math.max(...tasks.map(t => t.id || 0));
+    nextId = maxId + 1;
+  }
+
+  // assign ID
+  task.id = nextId;
+
+  tasks.push(task);
+
+  fs.writeFileSync(DATA_FILE, JSON.stringify(tasks, null, 2));
+}
+
+// SHOW DELETE PAGE
+app.get('/delete', (req, res) => {
+  const tasks = taskStore.load();
+  res.render('deleteTask', { title: 'Delete Task', tasks });
+});
+
+// DELETE ACTION
+app.post('/tasks/:id/delete', (req, res) => {
+  const idToDelete = Number(req.params.id);
+
+  // Load tasks, filter out the deleted one
+  const tasks = taskStore.load();
+  const updated = tasks.filter(t => Number(t.id) !== idToDelete);
+
+  // Save back (you need a way to save the full updated array)
+  taskStore.saveAll(updated);
+
+  res.redirect('/tasks');
+});
+
+// PROCESS FORM
+app.post('/task/process', (req, res) => {
+  console.log(req.body);
+  taskStore.saveTask(req.body);
+  res.redirect('/');
+});
+
+// 404 must be last
 app.use((req, res) => {
-res.status(404).send('404 - Page Not Found');
+  res.status(404).send('404 - Page Not Found');
 });
 
 app.listen(PORT, () => {
